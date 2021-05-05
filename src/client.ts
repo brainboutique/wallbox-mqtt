@@ -24,12 +24,10 @@ function loadConfig(configPath: string) {
 }
 
 export function mqttInit(clientConfig:ClientConfig) {
-    mqttClient = mqtt.connect("mqtt://"+config.mqtt.host+":"+config.mqtt.port, { will: { topic: config.mqtt.rootTopic +"status", payload: 'offline', retain:true } });
+    mqttClient = mqtt.connect("mqtt://"+config.mqtt.host+":"+config.mqtt.port, { will: { topic: config.mqtt.rootTopic +"proxyStatus", payload: 'offline', retain:true } });
 
     mqttClient.on("connect",()=>{
-        mqttClient.publish(config.mqtt.rootTopic +"status","online", {retain:true});
-        mqttClient.publish(config.mqtt.rootTopic +"status/ip",require("ip").address(), {retain:true});
-
+        mqttClient.publish(config.mqtt.rootTopic +"proxyStatus","online", {retain:true});
         mqttClient.subscribe(config.mqtt.rootTopic+"#");
     })
 
@@ -71,8 +69,8 @@ setInterval(async ()=>{
         //console.log("Full: ", f);
         //console.log("Detail: ", exposedData);
         if (lastExposedData.status != exposedData.status) mqttClient.publish(config.mqtt.rootTopic + id + "/status", String(exposedData.status), {retain:true});
-        if (lastExposedData.locked != exposedData.locked) mqttClient.publish(config.mqtt.rootTopic + id + "/locked", ""+String(!!exposedData.locked), {});
-        if (lastExposedData.maxCurrent != exposedData.maxCurrent) mqttClient.publish(config.mqtt.rootTopic + id + "/maxCurrent", String(exposedData.maxCurrent), {});
+        if (lastExposedData.locked != exposedData.locked) mqttClient.publish(config.mqtt.rootTopic + id + "/locked", ""+String(!!exposedData.locked), {retain:true});
+        if (lastExposedData.maxCurrent != exposedData.maxCurrent) mqttClient.publish(config.mqtt.rootTopic + id + "/maxCurrent", String(exposedData.maxCurrent), {retain:true});
         lastExposedData=exposedData;
     } else {
         var exposedData:any = {
