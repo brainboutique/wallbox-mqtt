@@ -12,4 +12,6 @@ export interface ClientConfigMQTT {
     rootTopic: string;
     host: string;
     port: number;
+    username: string;
+    password: string;
 }

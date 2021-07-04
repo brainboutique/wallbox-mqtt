@@ -24,7 +24,8 @@ function loadConfig(configPath: string) {
 }
 
 export function mqttInit(clientConfig:ClientConfig) {
-    mqttClient = mqtt.connect("mqtt://"+config.mqtt.host+":"+config.mqtt.port, { will: { topic: config.mqtt.rootTopic +"proxyStatus", payload: 'offline', retain:true } });
+    mqttClient = mqtt.connect("mqtt://"+config.mqtt.host+":"+config.mqtt.port, username: config.mqtt.username, password: config.mqtt.password,
+	{ will: { topic: config.mqtt.rootTopic +"proxyStatus", payload: 'offline', retain:true } });
 
     mqttClient.on("connect",()=>{
         mqttClient.publish(config.mqtt.rootTopic +"proxyStatus","online", {retain:true});
