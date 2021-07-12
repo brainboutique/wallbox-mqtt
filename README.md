@@ -24,10 +24,11 @@ wallbox/<chargerId>/maxCurrent
 
 - Actions supported
 ```
-wallbox/<chargerId>/lock
-wallbox/<chargerId>/unlock
-wallbox/<chargerId>/start
-wallbox/<chargerId>/pause
+wallbox/<chargerId>/command lock
+wallbox/<chargerId>/command unlock
+wallbox/<chargerId>/command start
+wallbox/<chargerId>/command pause
+wallbox/<chargerId>/command maxCurrent <current>
 ```
 Note: It seems as if it can take up to a minute (!) for the charger to change status, i.e. pause/start charging!
 
@@ -46,6 +47,8 @@ Update `config/config.json` (see template file) to add Wallbox account info as w
   "mqtt":{
     "host": "192.168.2.25",
     "port": 1883,
+    "username": "mqtt@email.com",
+    "password": "MqttPassword",
     "rootTopic": "wallbox/",
   }
 }

@@ -24,8 +24,7 @@ function loadConfig(configPath: string) {
 }
 
 export function mqttInit(clientConfig:ClientConfig) {
-    mqttClient = mqtt.connect("mqtt://"+config.mqtt.host+":"+config.mqtt.port, username: config.mqtt.username, password: config.mqtt.password,
-	{ will: { topic: config.mqtt.rootTopic +"proxyStatus", payload: 'offline', retain:true } });
+    mqttClient = mqtt.connect("mqtt://"+config.mqtt.host+":"+config.mqtt.port, { username: config.mqtt.username, password: config.mqtt.password, will: { topic: config.mqtt.rootTopic +"proxyStatus", payload: 'offline', retain:true } });
 
     mqttClient.on("connect",()=>{
         mqttClient.publish(config.mqtt.rootTopic +"proxyStatus","online", {retain:true});
@@ -33,8 +32,9 @@ export function mqttInit(clientConfig:ClientConfig) {
     })
 
     mqttClient.on('message',(topic, message:string, packet)=>{
-        //console.log("In '"+topic+"' :"+ message);
+        console.log("In '"+topic+"' :"+ message);
         var t = topic.split('/');
+	var m = (message+'').split(' ');
         if (t[2]=='command') {
             if (message == 'unlock')
                 api.unlock(t[1]);
@@ -44,6 +44,8 @@ export function mqttInit(clientConfig:ClientConfig) {
                 api.start(t[1]);
             if (message == 'pause')
                 api.pause(t[1]);
+            if (m[0] == 'maxCurrent')
+                api.maxCurrent(t[1], m[1]);
         }
     });
 }

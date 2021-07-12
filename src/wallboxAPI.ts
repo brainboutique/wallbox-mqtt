@@ -51,8 +51,11 @@ export class wallboxAPI {
                 });
             });
 
-            if (payload) req.write(JSON.stringify(payload));
-
+            if (payload) 
+	    {
+		req.write(JSON.stringify(payload));
+		//console.log("Payload-JSON-stringified: " + JSON.stringify(payload));
+	    }
             req.end();
         });
 
@@ -110,6 +113,7 @@ export class wallboxAPI {
 
     async lock(id:string) {
         var r=await this.get("/v2/charger/"+id,{locked:1},{method:"PUT"});
+        //console.log("Lock: ",r);
         return(r);
     }
     async unlock(id:string) {
@@ -125,6 +129,12 @@ export class wallboxAPI {
     }
     async start(id:string) {
         var r=await this.get("/v3/chargers/"+id+"/remote-action",{action:1},{method:"POST"});
+        //console.log("Start: ",r);
+        return(r);
+    }
+
+    async maxCurrent(id:string, current:any) {
+        var r=await this.get("/v3/chargers/"+id,{maxChargingCurrent:current},{method:"PUT"});
         //console.log("Start: ",r);
         return(r);
     }
