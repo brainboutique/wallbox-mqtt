@@ -34,7 +34,6 @@ Note: It seems as if it can take up to a minute (!) for the charger to change st
 
 # Configuration
 Update `config/config.json` (see template file) to add Wallbox account info as well as MQTT broker information.
-(MQTT Authentication not yet supported.)
 
 
 ```
