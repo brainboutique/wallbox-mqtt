@@ -8,6 +8,9 @@ export class wallboxAPI {
 
     jwt:string;
 
+    timestampLastAuth:number;
+
+    deltaReauthentication:number;
 
     config:ClientConfigHostWallbox;
 
@@ -15,6 +18,8 @@ export class wallboxAPI {
         this.config=config;
         //console.log("Initializiing wallbox ", config);
         this.jwt="";
+	this.timestampLastAuth=0;
+	this.deltaReauthentication=1000*60*60*24; // reauthenticate every 24 hours
     }
 
     getRaw(path:string, payload:any, options:any) {
@@ -78,6 +83,9 @@ export class wallboxAPI {
 
     async get(path:string, payload:any, options:any) {
 
+	if (this.timestampLastAuth + this.deltaReauthentication < Date.now()) {
+	    this.jwt="";
+	}
         if (this.jwt) {
             var r:any=await this.getRaw(path,payload,{...{headers:{authorization:"Bearer "+this.jwt}, ...options}});
             //console.log("Firt try",r);
@@ -85,6 +93,7 @@ export class wallboxAPI {
         }
         else {
             var authSuccess:boolean=await this.authenticate();
+	    this.timestampLastAuth = Date.now();
             //console.log("Auth success",authSuccess);
             var r:any=await this.getRaw(path,payload,{...{headers:{authorization:"Bearer "+this.jwt},...options}});
             //console.log("Second try",r);
