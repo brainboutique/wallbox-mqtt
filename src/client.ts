@@ -32,7 +32,7 @@ export function mqttInit(clientConfig:ClientConfig) {
     })
 
     mqttClient.on('message',(topic, message:string, packet)=>{
-        console.log("In '"+topic+"' :"+ message);
+        //console.log("In '"+topic+"' :"+ message);
         var t = topic.split('/');
 	var m = (message+'').split(' ');
         if (t[2]=='command') {
