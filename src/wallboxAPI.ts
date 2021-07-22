@@ -2,15 +2,15 @@ import {ClientConfigHostWallbox} from "./types";
 
 const https = require('https');
 
+const deltaReauthentication = 1000 * 60 * 60 * 24; // reauthenticate every 24 hours
+
 export class wallboxAPI {
 
     apiHost = "api.wall-box.com";
 
     jwt:string;
 
-    timestampLastAuth:number;
-
-    deltaReauthentication:number;
+    timestampNextAuth:number;
 
     config:ClientConfigHostWallbox;
 
@@ -18,8 +18,7 @@ export class wallboxAPI {
         this.config=config;
         //console.log("Initializiing wallbox ", config);
         this.jwt="";
-	this.timestampLastAuth=0;
-	this.deltaReauthentication=1000*60*60*24; // reauthenticate every 24 hours
+	this.timestampNextAuth=0;
     }
 
     getRaw(path:string, payload:any, options:any) {
@@ -83,7 +82,7 @@ export class wallboxAPI {
 
     async get(path:string, payload:any, options:any) {
 
-	if (this.timestampLastAuth + this.deltaReauthentication < Date.now()) {
+	if (this.timestampNextAuth < Date.now()) {
 	    this.jwt="";
 	}
         if (this.jwt) {
@@ -93,7 +92,7 @@ export class wallboxAPI {
         }
         else {
             var authSuccess:boolean=await this.authenticate();
-	    this.timestampLastAuth = Date.now();
+	    this.timestampNextAuth = Date.now() + deltaReauthentication;
             //console.log("Auth success",authSuccess);
             var r:any=await this.getRaw(path,payload,{...{headers:{authorization:"Bearer "+this.jwt},...options}});
             //console.log("Second try",r);
