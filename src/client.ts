@@ -58,6 +58,7 @@ setInterval(async ()=>{
         chargersList = await api.getChargersList();
         //console.log("myid ", chargersList[0].chargers);
     }
+    if (!chargersList || !chargersList[0]) return;
 
     let id=chargersList[0].chargers[0].id;
     var f = await api.getChargerDetails(id);
