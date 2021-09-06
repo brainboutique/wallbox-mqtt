@@ -2,12 +2,15 @@ import {ClientConfigHostWallbox} from "./types";
 
 const https = require('https');
 
+const deltaReauthentication = 1000 * 60 * 60 * 24; // reauthenticate every 24 hours
+
 export class wallboxAPI {
 
     apiHost = "api.wall-box.com";
 
     jwt:string;
 
+    timestampNextAuth:number;
 
     config:ClientConfigHostWallbox;
 
@@ -15,6 +18,7 @@ export class wallboxAPI {
         this.config=config;
         //console.log("Initializiing wallbox ", config);
         this.jwt="";
+	this.timestampNextAuth=0;
     }
 
     getRaw(path:string, payload:any, options:any) {
@@ -51,8 +55,11 @@ export class wallboxAPI {
                 });
             });
 
-            if (payload) req.write(JSON.stringify(payload));
-
+            if (payload) 
+	    {
+		req.write(JSON.stringify(payload));
+		//console.log("Payload-JSON-stringified: " + JSON.stringify(payload));
+	    }
             req.end();
         });
 
@@ -75,6 +82,9 @@ export class wallboxAPI {
 
     async get(path:string, payload:any, options:any) {
 
+	if (this.timestampNextAuth < Date.now()) {
+	    this.jwt="";
+	}
         if (this.jwt) {
             var r:any=await this.getRaw(path,payload,{...{headers:{authorization:"Bearer "+this.jwt}, ...options}});
             //console.log("Firt try",r);
@@ -82,6 +92,7 @@ export class wallboxAPI {
         }
         else {
             var authSuccess:boolean=await this.authenticate();
+	    this.timestampNextAuth = Date.now() + deltaReauthentication;
             //console.log("Auth success",authSuccess);
             var r:any=await this.getRaw(path,payload,{...{headers:{authorization:"Bearer "+this.jwt},...options}});
             //console.log("Second try",r);
@@ -110,6 +121,7 @@ export class wallboxAPI {
 
     async lock(id:string) {
         var r=await this.get("/v2/charger/"+id,{locked:1},{method:"PUT"});
+        //console.log("Lock: ",r);
         return(r);
     }
     async unlock(id:string) {
@@ -125,6 +137,12 @@ export class wallboxAPI {
     }
     async start(id:string) {
         var r=await this.get("/v3/chargers/"+id+"/remote-action",{action:1},{method:"POST"});
+        //console.log("Start: ",r);
+        return(r);
+    }
+
+    async maxCurrent(id:string, current:any) {
+        var r=await this.get("/v3/chargers/"+id,{maxChargingCurrent:current},{method:"PUT"});
         //console.log("Start: ",r);
         return(r);
     }
